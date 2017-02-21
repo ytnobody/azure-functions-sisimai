@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "name": "inputBlob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "mbox/{mboxfile}",
+      "connection": "function298d8203aa28_STORAGE"
+    }
+  ],
+  "disabled": false
+}
