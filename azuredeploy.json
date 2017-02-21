@@ -49,7 +49,9 @@
             "location": "[parameters('deployLocation')]",
             "tags": {},
             "properties": {},
-            "resources": [],
+            "resources": [
+                
+            ],
             "dependsOn": []
         },
         {
