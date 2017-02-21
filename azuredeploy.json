@@ -1,0 +1,147 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "defaultValue": "[concat('sisimai', uniqueString(resourceGroup().id))]",
+            "type": "String"
+        },
+        "servicePlanName": {
+            "defaultValue": "[concat('SisimaiFarm-', uniqueString(resourceGroup().id))]",
+            "type": "String"
+        },
+        "siteName": {
+            "defaultValue": "[concat('sisimai-', uniqueString(resourceGroup().id))]",
+            "type": "String"
+        },
+        "deployLocation": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String"
+        },
+        "storageSKU": {
+            "defaultValue": "Standard_LRS",
+            "type": "String"
+        },
+        "storageTier": {
+            "defaultValue": "Standard",
+            "type": "String"
+        }
+    },
+    "variables": {
+        "Hostname": "[concat(parameters('siteName'),'.azurewebsites.net')]",
+        "scmHostname": "[concat(parameters('siteName'),'.scm.azurewebsites.net')]",
+        "storageAccountName": "[toLower(parameters('storageAccountName'))]",
+        "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "repoUrl": "https://github.com/ytnobody/azure-functions-sisimai.git",
+        "branch": "master"
+    },
+    "resources": [
+        {
+            "comments": "Storage Account",
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "[parameters('storageSKU')]",
+                "tier": "[parameters('storageTier')]"
+            },
+            "kind": "Storage",
+            "name": "[parameters('storageAccountName')]",
+            "apiVersion": "2016-01-01",
+            "location": "[parameters('deployLocation')]",
+            "tags": {},
+            "properties": {},
+            "resources": [],
+            "dependsOn": []
+        },
+        {
+            "comments": "Server Farm(App Service Plan)",
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "kind": "functionapp",
+            "name": "[parameters('servicePlanName')]",
+            "apiVersion": "2015-08-01",
+            "location": "[parameters('deployLocation')]",
+            "properties": {
+                "name": "[parameters('servicePlanName')]",
+                "numberOfWorkers": 0
+            },
+            "resources": [],
+            "dependsOn": []
+        },
+        {
+            "comments": "Functions",
+            "type": "Microsoft.Web/sites",
+            "kind": "functionapp",
+            "name": "[parameters('siteName')]",
+            "apiVersion": "2015-08-01",
+            "location": "[parameters('deployLocation')]",
+            "properties": {
+                "name": "[parameters('siteName')]",
+                "hostNames": [
+                    "[variables('Hostname')]"
+                ],
+                "enabledHostNames": [
+                    "[variables('Hostname')]",
+                    "[variables('scmHostname')]"
+                ],
+                "hostNameSslStates": [
+                    {
+                        "name": "[variables('Hostname')]",
+                        "sslState": 0,
+                        "thumbprint": null,
+                        "ipBasedSslState": 0
+                    },
+                    {
+                        "name": "[variables('scmHostname')]",
+                        "sslState": 0,
+                        "thumbprint": null,
+                        "ipBasedSslState": 0
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('servicePlanName'))]"
+            },
+            "resources": [
+                {
+                    "name": "appsettings",
+                    "type": "config",
+                    "apiVersion": "2015-08-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
+                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                    ],
+                    "properties": {
+                        "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]",
+                        "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]",
+                        "FUNCTIONS_EXTENSION_VERSION": "~1",
+                        "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]",
+                        "WEBSITE_CONTENTSHARE": "[parameters('siteName')]",
+                        "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
+                        "SISIMAI_MBOX_BLOB_STORAGE": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
+                    }
+                },
+                {
+                    "apiVersion": "2015-04-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
+                        "[concat('Microsoft.Web/Sites/', parameters('siteName'), '/config/appsettings')]"
+                    ],
+                    "properties": {
+                        "repoUrl": "[variables('repoUrl')]",
+                        "branch": "[variables('branch')]",
+                        "IsManualIntegration": true
+                    }
+                }
+            ],
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('servicePlanName'))]"
+            ]
+        }
+    ]
+}
