@@ -5,13 +5,14 @@ use lib '../local/lib/perl5';
 use Sisimai;
 use JSON::PP;
 
-my $file = $ENV{inputBlob};
+require '../azure_func.pl';
+
+my $file = $ENV{req};
 my $bounced = Sisimai->make($file);
 
 if (!defined $bounced) {
-    print encode_json({message => "no bounced mail is contained", bounced => []});
-    exit;
+    res({message => "no bounced mail is contained", bounced => []});
 }
 
-print encode_json({message => "found", bounced => [map {$_->damn} @$bounced]});
+res({message => "found", bounced => [map {$_->damn} @$bounced]});
 

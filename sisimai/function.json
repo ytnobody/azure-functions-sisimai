@@ -1,11 +1,14 @@
 {
   "bindings": [
     {
-      "name": "inputBlob",
-      "type": "blobTrigger",
+      "name": "req",
+      "type": "httpTrigger",
       "direction": "in",
-      "path": "mbox/{mboxfile}",
-      "connection": "SISIMAI_MBOX_BLOB_STORAGE"
+    },
+    {
+      "name": "res",
+      "type": "http",
+      "direction": "out"
     }
   ],
   "disabled": false
