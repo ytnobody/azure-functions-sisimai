@@ -3,22 +3,42 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageAccountName": {
-            "defaultValue": "[concat('sisimai', uniqueString(resourceGroup().id))]",
+            "defaultValue": "sisimai",
             "type": "String"
         },
         "servicePlanName": {
-            "defaultValue": "[concat('SisimaiFarm-', uniqueString(resourceGroup().id))]",
+            "defaultValue": "SisimaiPlan",
             "type": "String"
         },
         "siteName": {
-            "defaultValue": "[concat('sisimai-', uniqueString(resourceGroup().id))]",
+            "defaultValue": "sisimaiFunc",
             "type": "String"
         },
         "deployLocation": {
-            "defaultValue": "[resourceGroup().location]",
+            "defaultValue": "Central US",
+            "allowedValues": [
+                "East US",
+                "East US 2",
+                "West US",
+                "West US 2",
+                "Central US",
+                "South Central US",
+                "North Central US",
+                "Brasil South",
+                "North Europe",
+                "West Europe",
+                "Southeast Asia",
+                "East Asia",
+                "Japan West",
+                "Japan East",
+                "Australia East",
+                "Australia Southeast",
+                "Canada Central",
+                "UK South"
+            ],
             "type": "String"
         },
-        "storageSKU": {
+        "storageSku": {
             "defaultValue": "Standard_LRS",
             "type": "String"
         },
@@ -40,7 +60,7 @@
             "comments": "Storage Account",
             "type": "Microsoft.Storage/storageAccounts",
             "sku": {
-                "name": "[parameters('storageSKU')]",
+                "name": "[parameters('storageSku')]",
                 "tier": "[parameters('storageTier')]"
             },
             "kind": "Storage",
