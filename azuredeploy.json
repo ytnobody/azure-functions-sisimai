@@ -3,15 +3,15 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageAccountName": {
-            "defaultValue": "sisimai",
+            "defaultValue": "[concat('sisimai', uniqueString(resourceGroup().id))]",
             "type": "String"
         },
         "servicePlanName": {
-            "defaultValue": "SisimaiPlan",
+            "defaultValue": "[concat('sisimaiPlan', uniqueString(resourceGroup().id))]",
             "type": "String"
         },
         "siteName": {
-            "defaultValue": "sisimaiFunc",
+            "defaultValue": "[concat('sisimaiFunc', uniqueString(resourceGroup().id))]",
             "type": "String"
         },
         "deployLocation": {
