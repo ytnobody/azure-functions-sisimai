@@ -2,18 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "storageAccountName": {
-            "defaultValue": "[concat('sisimai', uniqueString(resourceGroup().id))]",
-            "type": "String"
-        },
-        "servicePlanName": {
-            "defaultValue": "[concat('sisimaiPlan', uniqueString(resourceGroup().id))]",
-            "type": "String"
-        },
-        "siteName": {
-            "defaultValue": "[concat('sisimaiFunc', uniqueString(resourceGroup().id))]",
-            "type": "String"
-        },
         "deployLocation": {
             "defaultValue": "Central US",
             "allowedValues": [
@@ -36,21 +24,23 @@
                 "Canada Central",
                 "UK South"
             ],
-            "type": "String"
+            "type": "string"
         },
         "storageSku": {
             "defaultValue": "Standard_LRS",
-            "type": "String"
+            "type": "string"
         },
         "storageTier": {
             "defaultValue": "Standard",
-            "type": "String"
+            "type": "string"
         }
     },
     "variables": {
-        "Hostname": "[concat(parameters('siteName'),'.azurewebsites.net')]",
-        "scmHostname": "[concat(parameters('siteName'),'.scm.azurewebsites.net')]",
-        "storageAccountName": "[toLower(parameters('storageAccountName'))]",
+        "siteName": "[concat('sisimaifunc', uniqueString(resourceGroup().id))]",
+        "Hostname": "[concat(variables('siteName'),'.azurewebsites.net')]",
+        "scmHostname": "[concat(variables('siteName'),'.scm.azurewebsites.net')]",
+        "storageAccountName": "[toLower(concat('sisimai', uniqueString(resourceGroup().id)))]",
+        "servicePlanName": "[concat('sisimaiPlan', uniqueString(resourceGroup().id))]",
         "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
         "repoUrl": "https://github.com/ytnobody/azure-functions-sisimai.git",
         "branch": "master"
@@ -64,7 +54,7 @@
                 "tier": "[parameters('storageTier')]"
             },
             "kind": "Storage",
-            "name": "[parameters('storageAccountName')]",
+            "name": "[variables('storageAccountName')]",
             "apiVersion": "2016-01-01",
             "location": "[parameters('deployLocation')]",
             "tags": {},
@@ -85,11 +75,11 @@
                 "capacity": 0
             },
             "kind": "functionapp",
-            "name": "[parameters('servicePlanName')]",
+            "name": "[variables('servicePlanName')]",
             "apiVersion": "2015-08-01",
             "location": "[parameters('deployLocation')]",
             "properties": {
-                "name": "[parameters('servicePlanName')]",
+                "name": "[variables('servicePlanName')]",
                 "numberOfWorkers": 0
             },
             "resources": [],
@@ -99,11 +89,11 @@
             "comments": "Functions",
             "type": "Microsoft.Web/sites",
             "kind": "functionapp",
-            "name": "[parameters('siteName')]",
+            "name": "[variables('siteName')]",
             "apiVersion": "2015-08-01",
             "location": "[parameters('deployLocation')]",
             "properties": {
-                "name": "[parameters('siteName')]",
+                "name": "[variables('siteName')]",
                 "hostNames": [
                     "[variables('Hostname')]"
                 ],
@@ -125,7 +115,7 @@
                         "ipBasedSslState": 0
                     }
                 ],
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('servicePlanName'))]"
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]"
             },
             "resources": [
                 {
@@ -133,15 +123,15 @@
                     "type": "config",
                     "apiVersion": "2015-08-01",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
-                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                        "[resourceId('Microsoft.Web/Sites', variables('siteName'))]",
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
                     ],
                     "properties": {
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]",
                         "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]",
                         "FUNCTIONS_EXTENSION_VERSION": "~1",
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]",
-                        "WEBSITE_CONTENTSHARE": "[parameters('siteName')]",
+                        "WEBSITE_CONTENTSHARE": "[variables('siteName')]",
                         "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
                         "SISIMAI_MBOX_BLOB_STORAGE": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2015-05-01-preview').key1)]"
                     }
@@ -151,8 +141,8 @@
                     "name": "web",
                     "type": "sourcecontrols",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
-                        "[concat('Microsoft.Web/Sites/', parameters('siteName'), '/config/appsettings')]"
+                        "[resourceId('Microsoft.Web/Sites', variables('siteName'))]",
+                        "[concat('Microsoft.Web/Sites/', variables('siteName'), '/config/appsettings')]"
                     ],
                     "properties": {
                         "repoUrl": "[variables('repoUrl')]",
@@ -162,7 +152,7 @@
                 }
             ],
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', parameters('servicePlanName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]"
             ]
         }
     ]
