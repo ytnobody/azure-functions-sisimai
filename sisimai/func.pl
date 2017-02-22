@@ -4,15 +4,10 @@ use utf8;
 use lib '../local/lib/perl5';
 use Sisimai;
 use JSON::PP;
-use Data::Dumper;
 
 require '../azure_func.pl';
 
 my $file = $ENV{req};
-
-my $data = read_from('req');
-print Dumper($data);
-
 my $bounced = Sisimai->make($file);
 
 if (!defined $bounced) {
