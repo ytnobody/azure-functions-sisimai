@@ -4,6 +4,8 @@ The [Sisimai](http://libsisimai.org/) running on the [Azure Functions](https://a
 
 [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/)
 
+![image](https://bytebucket.org/ytnobody/images/raw/7ebf0d7130da17fe3d98bcefe5ffd0c6ec8554db/blogimg/sisimai-on-azure-functions.gif)
+
 ## SYNOPSIS
 
 1. Check the https endpoint url for function, and copy it.
